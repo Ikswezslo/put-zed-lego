@@ -45,7 +45,7 @@ sets <- read.csv("data/sets.csv")
 themes <- read.csv("data/themes.csv")
 ```
 
-Aby przyspieszyć tworzenie raportów, blok ten jest cachowany.
+W celu przyspieszenia obliczeń, blok ten jest cachowany.
 
 # Przegląd tabel pochodzących ze strony Rebrickable
 
@@ -217,7 +217,7 @@ Podsumowanie tabeli:
 summary(themes)
 ```
 
-# Utworzenie tabel do analizy danych
+# Utworzenie zbiorów danych do analizy
 
 ## Uzyskanie informacji o głównym motywie dla każdego motywu
 
@@ -234,9 +234,9 @@ for (i in row.names(themes)) {
 kable(head(main_themes))
 ```
 
-Ze względu na bardzo dużą liczbę motywów, które mogą mieć zestawy lego, postanowiłem ograniczyć się jedynie do motywów głównych. Aby tego dokonać, dla każdego istniejącego motywu znalazłem i dodałem odpowiedni motyw główny. W ten sposób liczba motywów ograniczyła się z 385 unikalnych motywów do 145 głównych motywów. Nowo utworzona tabela nosi nazwę 'main_themes' i jej przykładowe wartości prezentuje powyższa tabela.
+Ze względu na bardzo dużą liczbę motywów, które mogą mieć zestawy Lego, postanowiłem ograniczyć się jedynie do motywów głównych. Aby tego dokonać, dla każdego istniejącego motywu odnajdywany i dodawany jest odpowiedni motyw główny. W ten sposób liczba motywów ograniczyła się z 385 unikalnych motywów do 145 głównych motywów. Nowo utworzony zbiór danych nosi nazwę 'main_themes' i jej przykładowe wartości prezentuje powyższa tabela.
 
-## Powiązanie tabeli nadrzędnej zestawami i głównym motywem
+## Powiązanie tabeli nadrzędnej z zestawami i głównym motywem
 
 ```{r}
 lego_sets <- merge(inventories, sets, by = "set_num")
@@ -249,7 +249,7 @@ lego_sets <- lego_sets %>%
 kable(head(lego_sets))
 ```
 
-Następnie tabele 'inventories' i 'sets' są łączone ze sobą wewnętrznie w wyniku czego tracona jest część danych z tabeli 'inventories'. Utracone wiersze prezentują jednak jedynie pojedyncze minifigurki dlatego postanowiłem nie uwzględniać tych danych w analizie. Poźniej nowo utworzona tabela jest łączona z tabelą 'main_themes'. Ponadto ograniczyłem liczbę kolumn do: id, set_num, version, name (dawniej name.x), year, num_parts, theme (dawniej main_theme) oraz zmieniłem typ zmiennej theme na zmienną kategorialną. Ostatecznie powstaje tabela 'lego_sets' i jej przykładowe wartości prezentuje powyższa tabela.
+Następnie tabele 'inventories' i 'sets' łączone są ze sobą wewnętrznie w wyniku czego tracona jest część danych z tabeli 'inventories'. Utracone wiersze prezentują jednak jedynie pojedyncze minifigurki, dlatego postanowiłem nie uwzględniać tych danych w analizie. Poźniej nowo utworzony zbiór danych jest łączony ze zbiorem 'main_themes'. Ponadto ograniczyłem liczbę kolumn do: 'id', 'set_num', 'version', 'name' (wcześniej 'name.x'), 'year', 'num_parts', 'theme' (wcześniej 'main_theme') oraz zmieniłem typ zmiennej 'theme' na typ kategorialny. Ostatecznie powstaje zbiór danych 'lego_sets' i jej przykładowe wartości prezentuje powyższa tabela.
 
 ## Dodanie informacji o liczbie minifigurek
 
@@ -264,9 +264,9 @@ lego_sets$minifigs_count[is.na(lego_sets$minifigs_count)] <- 0
 kable(head(lego_sets))
 ```
 
-W ostatnim kroku dodane zostają informacje o liczbie w każdym zestawie. Nie każdy zestaw posiada minifigurki, dlatego wykorzystałem połączenie zewnętrzne lewostronne. Brakujące wartości zostały zestąpione zerami. W powyższej tabeli znajdują się przykładowe wartości.
+W ostatnim kroku dodane zostają informacje o liczbie minifigurek w każdym zestawie. Nie każdy zestaw posiada minifigurki, dlatego wykorzystałem połączenie zewnętrzne. Brakujące wartości zostały zastąpione zerami. W powyższej tabeli znajdują się przykładowe wartości.
 
-Podsumowanie uzyskanej tabeli:
+Podsumowanie uzyskanego zbioru danych 'lego_sets':
 
 ```{r}
 summary(lego_sets)
@@ -290,9 +290,9 @@ lego_parts <- lego_parts %>%
 kable(head(lego_parts))
 ```
 
-Dodatkowo dla analizy skoncetrowanej na częściach Lego, połączyłem tabele inventory_parts, colors i part_categories tworząc tabelę wynikową 'lego_parts', której przykładowe wartości widoczne są w powyższej tabeli. Ograniczyłem liczbę kolumn do: inventory_id, quantity, is_spare, color (dawniej name.x), rgb, is_trans, part_material, category (dawniej name). Zmieniłem typy zmiennych category, part_material i color na zmienne kategorialne. Z kolei zmienne is_trans i is_spare stały się zmiennymi logicznymi.
+Dodatkowo dla analizy skoncetrowanej na częściach Lego, połączyłem tabele inventory_parts, colors i part_categories tworząc wynikowy zbiór danych 'lego_parts', którego przykładowe wartości widoczne są w powyższej tabeli. Ograniczyłem liczbę kolumn do: 'inventory_id', 'quantity', 'is_spare', 'color' (wcześniej 'name.x'), 'rgb', 'is_trans', 'part_material', 'category' (wcześniej 'name'). Zmieniłem typy zmiennych 'category', 'part_material' i 'color' na typy kategorialne. Z kolei zmienne 'is_trans' i 'is_spare' stały się zmiennymi logicznymi.
 
-Podsumowanie uzyskanej tabeli:
+Podsumowanie uzyskanego zbioru danych 'lego_parts':
 
 ```{r}
 summary(lego_parts)
@@ -305,7 +305,7 @@ summary(lego_parts)
 ```{r}
 ggplot(lego_sets, aes(x=num_parts)) +
   geom_density() + 
-  ggtitle("Rozkład liczby części") + 
+  ggtitle("Rozkład liczby części Lego") + 
   xlab("liczba części") + 
   ylab("") +
   theme_minimal() + 
@@ -313,11 +313,9 @@ ggplot(lego_sets, aes(x=num_parts)) +
         axis.ticks.y=element_blank())
 ```
 
-Z wykresu ciężko coś odczytać ze względu na dużą liczbę ekstremalnych wartości oraz skoncentrowanie wokół wartości. Z tego względu postanowiłem pozbyć się wartości najbardziej odstających. 
+Z wykresu ciężko coś odczytać ze względu na dużą liczbę ekstremalnych wartości oraz skoncentrowanie danych w okolicach zera. Z tego względu postanowiłem pozbyć się wartości najbardziej odstających: 
 
-Kolejne 2 interaktywne wykresy przedstawiają te ograniczone dane: 
-
-```{r}
+```{r, echo=TRUE}
 quartiles <- quantile(lego_sets$num_parts, probs=c(.25, .75))
 IQR <- IQR(lego_sets$num_parts)
  
@@ -325,10 +323,14 @@ Lower <- quartiles[1] - 1.5*IQR
 Upper <- quartiles[2] + 1.5*IQR 
  
 lego_sets_num_parts_no_outliers <- subset(lego_sets, lego_sets$num_parts > Lower & lego_sets$num_parts < Upper)
- 
+```
+
+Kolejne 2 wykresy przedstawiają rozkład liczby części Lego po usunięciu ekstremalnych wartości: 
+
+```{r}
 p <- ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   geom_density() + 
-  ggtitle("Rozkład liczby części po usunięciu ekstremalnych wartości") + 
+  ggtitle("Rozkład liczby części Lego bez ekstremalnych wartości") + 
   xlab("liczba części") + 
   ylab("") +
   theme_minimal() + 
@@ -341,7 +343,7 @@ ggplotly()
 ```{r}
 ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   geom_boxplot() +
-  ggtitle("Rozkład liczby części po usunięciu ekstremalnych wartości") + 
+  ggtitle("Rozkład liczby części Lego bez ekstremalnych wartości") + 
   xlab("liczba części") + 
   ylab("") +
   theme_minimal() + 
@@ -349,7 +351,7 @@ ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
         axis.ticks.y=element_blank())
 ```
 
-Z tego co widzimy na wykresie gęstości, najwięcej zestawów składa się tylko z jednej części. W miarę zwiększania się liczby części, wartość funkcji gęstości maleje. Wyjątkiem tutaj są zestawy z około 100 częściami - tutaj następuje lekkie zwiększenie wartości co oznacza, że powstaje stosunkowo dużo zestawów takich zestawów. Takie podwyższenie można zaobserwować róznież w okolicach liczby 200, lecz jest to znacznie mniej zauważalne.
+Z tego co widzimy na wykresie gęstości, najwięcej zestawów składa się tylko z jednej części. W miarę zwiększania się liczby części, wartość funkcji gęstości maleje. Wyjątkiem tutaj jest wzniesienie przy około 100 częściach co oznacza, że powstaje stosunkowo dużo zestawów z taką liczbą części. Podobne wzniesienie można zaobserwować również w okolicach liczby 200, lecz jest ono znacznie mniejsze.
 
 ```{r}
 p <- lego_sets %>% 
@@ -364,7 +366,7 @@ p <- lego_sets %>%
 ggplotly()
 ```
 
-Powyższy wykres został ograniczony jedynie do zestawów, które posiadają przynajmniej jedną minifigurkę.
+Powyższy wykres został ograniczony do zestawów, które posiadają przynajmniej jedną minifigurkę.
 
 ```{r}
 lego_sets %>%
@@ -373,14 +375,12 @@ lego_sets %>%
   ggplot(aes(has_minifigs, n, fill=factor(has_minifigs))) +
     geom_bar(stat="identity") + 
     geom_text(aes(label=paste(format(n / sum(n) * 100.0, digits=4), "%", sep=""), y=n/2.0), color="white", size=7) +
-    ggtitle("Podział zestawów w zależności od posiadnia minifigurek") + 
+    ggtitle("Podział zestawów w zależności od posiadania minifigurek") + 
     xlab("") + 
     ylab("liczba zestawów") +
     theme_minimal() +
     guides(fill = "none")  
 ```
-
-Zatem mniej więcej co 3 zestaw zawiera przynajmniej jedną minifigurkę.
 
 ```{r}
 lego_sets %>%
@@ -390,15 +390,14 @@ lego_sets %>%
   ggplot(aes(has_more_versions, n, fill=factor(has_more_versions))) +
     geom_bar(stat="identity") + 
     geom_text(aes(label=paste(format(n / sum(n) * 100.0, digits=4), "%", sep=""), y=n/2.0), color="white", size=7) +
-    ggtitle("Podział zestawów w zależności od liczby wersji") + 
+    ggtitle("Podział zestawów w zależności od posiadania wielu wersji") + 
     xlab("") + 
     ylab("") +
     theme_minimal() +
     guides(fill = "none") 
 ```
 
-Przeważająca większość zestawów posiada tylko jedną wersją, lecz mimo to zauważa
-Dość znaczna ilość zestawów powstaje w więcej niż jednej wersji.
+Przeważająca większość zestawów posiada tylko jedną wersję, lecz mimo to zauważalna ilość powstaje w więcej niż jednej wersji.
 
 ## Rankingi
 
@@ -462,6 +461,8 @@ ggplot(theme_median_parts,aes(x=reorder(theme, median_num_parts), y=median_num_p
   theme_minimal()
 ```
 
+Ponieważ liczba części ma bardzo dużo wartości odstających o wysokich wartościach, zdecydowałem się na wykorzystanie mediany, ponieważ jest ona bardziej odporna od średniej na wartości odstające.
+
 ```{r}
 theme_mean_minifigs_count <- lego_sets %>% 
   group_by(theme) %>%
@@ -492,7 +493,7 @@ lego_sets %>%
     theme_minimal()
 ```
 
-Widzimy od końca lat 90 gwałtowny wzrost produkowanych zestawów, a następnie spadek od roku 2002 do 2005. Prawdopodobnie jest to powiązane z kryzysem firmy w tamtym czasie i drastycznymi cięciami kosztów: https://businessinsider.com.pl/firmy/strategie/lego-model-biznesowy-i-strategia-vidiyo-zestawy-hidden-side-nowe-produkty-i-historia/4zzgq1x
+Na wykresie widać gwałtowny wzrost produkowanych zestawów od końcówki lat 90, a następnie spadek od roku 2002 do 2005. Prawdopodobnie jest to powiązane z kryzysem firmy w tamtym czasie i drastycznymi cięciami kosztów: https://businessinsider.com.pl/firmy/strategie/lego-model-biznesowy-i-strategia-vidiyo-zestawy-hidden-side-nowe-produkty-i-historia/4zzgq1x
 
 ```{r, message=FALSE}
 lego_sets %>% 
@@ -515,13 +516,13 @@ lego_sets %>%
   ggplot(aes(x=year, y=mean_minifigs)) +
     geom_point() + 
     geom_smooth(span=0.8) + 
-    ggtitle("Średnia liczba figurek w zestawach Lego na przestrzeni lat") + 
+    ggtitle("Średnia liczba minifigurek w zestawach Lego na przestrzeni lat") + 
     xlab("rok") + 
-    ylab("średnia liczba figurek") +
+    ylab("średnia liczba minifigurek") +
     theme_minimal()
 ```
 
-Pierwsze minifigurki powstały około 1975 roku i od tego czasu ich średnia liczba w zestawach nie ma trendu rosnącego ani spadkowego co widać wyraźniej na wykresie poniżej uwzględniającym jedynie zestawy z przynajmniej jedną minifigurką:
+Pierwsze minifigurki Lego zaczęły pojawiać się w zestawach od około 1975 roku i od tego czasu ich średnia liczba nie ma trendu rosnącego ani spadkowego. Widać to wyraźniej na wykresie poniżej, który uwzględnia jedynie zestawy z przynajmniej jedną minifigurką:
 
 ```{r, message=FALSE}
 lego_sets %>% 
@@ -531,9 +532,9 @@ lego_sets %>%
   ggplot(aes(x=year, y=mean_minifigs)) +
     geom_point() + 
     geom_smooth(method = lm) + 
-    ggtitle("Średnia liczba figurek w zestawach Lego na przestrzeni lat") + 
+    ggtitle("Średnia liczba minifigurek w zestawach Lego na przestrzeni lat") + 
     xlab("rok") + 
-    ylab("średnia liczba figurek") +
+    ylab("średnia liczba minifigurek") +
     theme_minimal()
 ```
 
@@ -545,15 +546,15 @@ lego_sets %>%
   ggplot(aes(x=num_parts, y=minifigs_count)) +
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
-    ggtitle("Zależność między liczbą figurek a liczbą cześci") + 
+    ggtitle("Zależność między liczbą minifigurek a liczbą części") + 
     xlab("liczba części") + 
-    ylab("liczba figurek") +
+    ylab("liczba minifigurek") +
     theme_minimal()
 ```
 
 ```{r}
 lego_sets %>% 
-  mutate(has_minifigs = if_else(minifigs_count > 0, "Zestawy z figurkami", "Zestawy bez figurek")) %>%
+  mutate(has_minifigs = if_else(minifigs_count > 0, "Zestawy z minifigurkami", "Zestawy bez minifigurek")) %>%
   count(year, has_minifigs) %>% 
   ggplot(aes(x=year, y=n, fill=has_minifigs)) +
     geom_bar(stat="identity") + 
@@ -564,13 +565,13 @@ lego_sets %>%
     theme(legend.title=element_blank()) 
 ```
 
-Wraz w powstaniem minifigurek Lego, ilość zestawów z ich udziałem rosła/malała podobnie jak zestawów bez minifigurek.
+Wraz z pojawieniem się minifigurek Lego, stosunkowa ilość zestawów z ich udziałem rosła/malała podobnie jak zestawów bez minifigurek.
 
 # Analiza części Lego
 
 ```{r}
 lego_parts %>%
-  mutate(is_trans = if_else(is_trans == TRUE, "Przezroczyste", "Nieprzezroczyste")) %>%
+  mutate(is_trans = if_else(is_trans == TRUE, "przezroczyste", "nieprzezroczyste")) %>%
   count(is_trans) %>%
   ggplot(aes(is_trans, n, fill=factor(is_trans))) +
     geom_bar(stat="identity") + 
@@ -593,7 +594,7 @@ ggplot(category_parts_count,aes(x=reorder(category, n), y=n)) +
   geom_bar(stat="identity", fill="#86E3CE") + 
   geom_text(aes(label=n), size=3, hjust=1.2, color="#444444") +
   coord_flip() + 
-  ggtitle("Najczęściej występujące kategorie klocków") + 
+  ggtitle("Najczęściej występujące kategorie części") + 
   xlab("") + 
   ylab("") +
   theme_minimal() +
@@ -611,7 +612,7 @@ ggplot(category_parts_count,aes(x=reorder(color, n), y=n)) +
   geom_bar(stat="identity", fill="#D0E6A5") + 
   geom_text(aes(label=n), size=3, hjust=1.2, color="#444444") +
   coord_flip() + 
-  ggtitle("Najczęściej występujące kolory klocków") + 
+  ggtitle("Najczęściej występujące kolory części") + 
   xlab("") + 
   ylab("") +
   theme_minimal() +
@@ -621,9 +622,10 @@ ggplot(category_parts_count,aes(x=reorder(color, n), y=n)) +
 ```
 
 
-# Predykcja przyszłych cen zestawów Lego
+# Predykcja cen przyszłych zestawów Lego
  
- https://www.kaggle.com/datasets/alexracape/lego-sets-and-prices-over-time/data
+Zbiór danych zawierający m.in nazwy zestawów i ich ceny pochodzi ze strony: 
+https://www.kaggle.com/datasets/alexracape/lego-sets-and-prices-over-time/data
  
 ## Dodanie informacji o cenach
  
@@ -635,6 +637,8 @@ lego_sets_with_price <- read.csv("data/additional/sets.csv") %>%
   rename(set_num = Set_ID, theme_group = Theme_Group, category = Category, price = USD_MSRP) %>%
   mutate(theme_group = factor(theme_group), category = factor(category))
 ```
+ 
+Istniejący zbiór danych 'lego_sets' połączony został wewnętrznie z nowo wczytaną tabelą. Dodane zostały nowe kolumny: 'theme_group' (grupa tematyczna), 'category' (kategoria zestawu), 'price' (Sugerowana Cena Detaliczna Producenta w USD). Ze względu na połączenie wewnętrzne, tracona jest spora część danych - zachowujemy jedynie 6252 wierszy z 23501. Nowo powstały zbiór danych nazwany jest 'lego_sets_with_price' i jego wartości przedstawione są w interaktywnej tabeli poniżej:
  
  
 ```{r}
@@ -651,7 +655,7 @@ p <- lego_sets_with_price %>%
   ggplot(aes(x=price)) +
   geom_density() +
   ggtitle("Rozkład ceny zestawów Lego") + 
-  xlab("liczba części") + 
+  xlab("cena") + 
   ylab("") +
   theme_minimal() +
   theme(axis.text.y=element_blank(),
@@ -659,6 +663,8 @@ p <- lego_sets_with_price %>%
   
 ggplotly()
 ```
+ 
+Zdecydowana większość zestawów miało cenę w wysokości około 10 dolarów. Dodatkowo dostrzec można lokalne wzniesienia funkcji gęstości co mniej więcej 50 dolarów.
  
 ```{r, message=FALSE}
 p <- lego_sets_with_price %>% 
@@ -680,8 +686,8 @@ lego_sets_with_price %>%
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
     ggtitle("Zależność między ceną a liczbą części") + 
-    xlab("liczba części") + 
-    ylab("cena") +
+    xlab("cena") + 
+    ylab("liczba części") +
     theme_minimal()
 ```
  
@@ -691,28 +697,37 @@ lego_sets_with_price %>%
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
     ggtitle("Zależność między ceną a liczbą minifigurek") + 
-    xlab("liczba minifigurek") + 
-    ylab("cena") +
+    xlab("cena") + 
+    ylab("liczba minifigurek") +
     theme_minimal()
 ```
  
-##  Przygotowanie danych
- 
-```{r}
+W miarę zwiększania zarówno liczby części jak i liczby minifigurek, zestawy stają się średnio droższe. 
 
+##  Przygotowanie danych
+
+```{r, echo=TRUE}
 trainData <- lego_sets_with_price[lego_sets_with_price$year < 2020,]
 testData  <- lego_sets_with_price[lego_sets_with_price$year >= 2020,]
+```
 
+Zbiór danych podzielony został na dane treningowe i testowe. Dane treningowe to zestawy z rokiem wcześniejszym niż 2020, a pozostałe dane to dane testowe.
+
+```{r,echo=TRUE}
 X <- c("year", "category", "theme_group", "theme", "num_parts", "minifigs_count")
 y <- "price"
 cfe <- mkCrossFrameNExperiment(trainData, varlist = X, outcomename = y, verbose = F)
 plan <- cfe$treatments
 summary(cfe$crossFrame)
 ```
+
+Do przygotowania danych do zadania regresji wykorzystany został pakiet vtreat, który potrafi m.in zamieniać zmienne kategorialne na numeryczne lub tworzyć nowe zmienne w oparciu o istniejące (np. zmienne wpływu, zmienne zawierające częstość występowania zmiennych). Najbardziej istotne zmienne są następnie automatycznie wybierane. Podsumowanie tych zmiennych znajduje się powyżej.
  
 ## Trening modelu 
+
+Jako model postanowiłem wybrać drzewa wzmacniane gradientowo, a konkretnie pakiet xgboost.
  
-```{r}
+```{r,echo=TRUE}
 trainMatrix <- as.matrix(subset(cfe$crossFrame, select = -price))
 
 cv <- xgb.cv(trainMatrix, label = trainData$price,
@@ -724,7 +739,9 @@ cv <- xgb.cv(trainMatrix, label = trainData$price,
 evalframe <- as.data.frame(cv$evaluation_log)
 ```
  
-```{r}
+Początkowo odbywa się faza dostrajania hiperparametru 'nrounds' oznaczającego liczbę iteracji w trakcie treningu. Poniżej znajduje się wykres z uzyskanymi wynikami i wybraną liczbą iteracji oznaczoną niebieską linią:
+ 
+```{r,echo=TRUE}
 NROUNDS <- which.min(evalframe$test_rmse_mean)
 
 ggplot(evalframe, aes(x=iter, y=test_rmse_mean)) +
@@ -734,8 +751,7 @@ ggplot(evalframe, aes(x=iter, y=test_rmse_mean)) +
     theme_minimal()
 ```
  
- 
-```{r}
+```{r,echo=TRUE}
 model <- xgboost(data = trainMatrix,
                  label = trainData$price,
                  params = list(objective = "reg:squarederror"),
@@ -744,7 +760,11 @@ model <- xgboost(data = trainMatrix,
 model
 ```
  
+Następnie odbywa się właściwy trening modelu z odpowiednio ustawionym parametrem 'nrounds'.
+ 
 ## Ocena modelu  
+
+W poniższej tabeli znajdują się wyniki predykcji modelu i wartości rzeczywiste:
  
 ```{r}
 testMatrix <- as.matrix(subset(prepare(plan, testData), select = -price))
@@ -754,9 +774,13 @@ data <- data.frame(actual=testData$price, predicted=pred)
 prettyTable(data)
 ```
  
+Model uzyskał następujący wynik dla współczynnika RMSE:
+ 
 ```{r}
 sqrt(mean((data$actual - data$predicted)^2))
 ```
+ 
+RMSE można interpretować jako średnią oczekiwaną różnicę +/- między wartością przewidywaną a rzeczywistą.
  
 ```{r}
 data %>% 
@@ -769,4 +793,5 @@ data %>%
     theme_minimal()
 ```
  
+Powyżej znajduje się wykres zależności między ceną rzeczywistą a przewidywaną. Mimo tego, że istnieją liczne obserwacje dla których przewidywania modelu znacznie odbiegają od rzeczywistości, to w ogólności radzi sobie on dość dobrze.
  
