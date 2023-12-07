@@ -216,7 +216,7 @@ Podsumowanie tabeli:
 summary(themes)
 ```
 
-# Utworzenie tabel do analizy
+# Utworzenie tabel do analizy danych
 
 ## Uzyskanie informacji o głównym motywie dla każdego motywu
 
@@ -297,34 +297,9 @@ Podsumowanie uzyskanej tabeli:
 summary(lego_parts)
 ```
 
-# Analiza zestawów lego
+# Analiza zestawów Lego
 
-```{r}
-lego_sets %>% 
-  count(year) %>% 
-  ggplot(aes(x=year, y=n)) +
-    geom_bar(stat="identity") + 
-    geom_smooth() +
-    ggtitle("Ilość powstałych zestawów w każdym roku") + 
-    xlab("rok") + 
-    ylab("liczba zestawów") +
-    theme_minimal()
-```
-
-
-```{r}
-lego_sets %>% 
-  group_by(year) %>% 
-  summarise(mean_num_parts = mean(num_parts)) %>%
-  ggplot(aes(x=year, y=mean_num_parts)) +
-    geom_point() + 
-    geom_smooth(method = lm) + 
-    geom_segment(aes(x=year, xend=year, y=0, yend=mean_num_parts)) +
-    ggtitle("Średnia liczba części w zestawach lego na przestrzeni lat") + 
-    xlab("rok") + 
-    ylab("średnia liczba części") +
-    theme_minimal()
-```
+## Rozkłady wartości
 
 ```{r}
 ggplot(lego_sets, aes(x=num_parts)) +
@@ -337,6 +312,10 @@ ggplot(lego_sets, aes(x=num_parts)) +
         axis.ticks.y=element_blank())
 ```
 
+Z wykresu ciężko coś odczytać ze względu na dużą liczbę ekstremalnych wartości oraz skoncentrowanie wokół wartości. Z tego względu postanowiłem pozbyć się wartości najbardziej odstających. 
+
+Kolejne 2 interaktywne wykresy przedstawiają te ograniczone dane: 
+
 ```{r}
 quartiles <- quantile(lego_sets$num_parts, probs=c(.25, .75))
 IQR <- IQR(lego_sets$num_parts)
@@ -346,7 +325,7 @@ Upper <- quartiles[2] + 1.5*IQR
  
 lego_sets_num_parts_no_outliers <- subset(lego_sets, lego_sets$num_parts > Lower & lego_sets$num_parts < Upper)
  
-ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
+p <- ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   geom_density() + 
   ggtitle("Rozkład liczby części po usunięciu ekstremalnych wartości") + 
   xlab("liczba części") + 
@@ -354,8 +333,9 @@ ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   theme_minimal() + 
   theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
-```
 
+ggplotly()
+```
 
 ```{r}
 ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
@@ -367,6 +347,50 @@ ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 ```
+
+Poniższy wykres został ograniczony jedynie do zestawów, które posiadają przynajmniej jedną minifigurkę:
+
+```{r}
+p <- lego_sets %>% 
+  filter(minifigs_count > 0) %>% 
+  ggplot(aes(x=minifigs_count)) +
+  geom_density() +
+  theme_minimal() +
+  ggtitle("Rozkład liczby minifigurek") + 
+  xlab("liczba minifigurek") + 
+  ylab("") +
+
+ggplotly()
+```
+
+```{r}
+lego_sets %>%
+  mutate(has_minifigs = if_else(minifigs_count > 0, "Zestawy z figurkami", "Zestawy bez figurek")) %>%
+  count(has_minifigs) %>%
+  ggplot(aes(has_minifigs, n, fill=factor(has_minifigs))) +
+    geom_bar(stat="identity") + 
+    ggtitle("Podział zestawów w zależności od posiadnia minifigurek") + 
+    xlab("") + 
+    ylab("liczba zestawów") +
+    theme_minimal() +
+    guides(fill = "none")  
+```
+
+```{r}
+lego_sets %>%
+  group_by(name) %>%
+  summarise(has_more_versions = if_else(sum(version) > 1, "Więcej niż jedna wersja", "Jedna wersja")) %>%
+  count(has_more_versions) %>%
+  ggplot(aes(has_more_versions, n, fill=factor(has_more_versions))) +
+    geom_bar(stat="identity") + 
+    ggtitle("Podział zestawów w zależności od liczby wersji") + 
+    xlab("") + 
+    ylab("") +
+    theme_minimal() +
+    guides(fill = "none")  
+```
+
+## Rankingi
 
 ```{r}
 num_parts_best_sets <- lego_sets %>% 
@@ -393,7 +417,6 @@ ggplot(minifigs_count_best_sets, aes(x=reorder(name, minifigs_count), y=minifigs
   ylab("liczba minifigurek") +
   theme_minimal()
 ```
-
 
 ```{r}
 theme_counts <- lego_sets %>% 
@@ -426,6 +449,49 @@ ggplot(theme_mean_parts,aes(x=reorder(theme, mean_num_parts), y=mean_num_parts))
 ```
 
 ```{r}
+theme_mean_minifigs_count <- lego_sets %>% 
+  group_by(theme) %>%
+  summarise(mean_minifigs_count=mean(minifigs_count)) %>%
+  filter(mean_minifigs_count > quantile(mean_minifigs_count, probs=c(.80)))
+
+ggplot(theme_mean_minifigs_count,aes(x=reorder(theme, mean_minifigs_count), y=mean_minifigs_count)) +
+  geom_bar(stat="identity") + 
+  coord_flip() + 
+  ggtitle("Motywy z największą średnią liczby minifigurek") + 
+  xlab("motyw główny") + 
+  ylab("liczba minifigurek") +
+  theme_minimal()
+```
+
+## Trendy
+
+```{r}
+lego_sets %>% 
+  count(year) %>% 
+  ggplot(aes(x=year, y=n)) +
+    geom_bar(stat="identity") + 
+    geom_smooth() +
+    ggtitle("Ilość powstałych zestawów w każdym roku") + 
+    xlab("rok") + 
+    ylab("liczba zestawów") +
+    theme_minimal()
+```
+
+```{r}
+lego_sets %>% 
+  group_by(year) %>% 
+  summarise(mean_num_parts = mean(num_parts)) %>%
+  ggplot(aes(x=year, y=mean_num_parts)) +
+    geom_point() + 
+    geom_smooth(method = lm) + 
+    geom_segment(aes(x=year, xend=year, y=0, yend=mean_num_parts)) +
+    ggtitle("Średnia liczba części w zestawach lego na przestrzeni lat") + 
+    xlab("rok") + 
+    ylab("średnia liczba części") +
+    theme_minimal()
+```
+
+```{r}
 lego_sets %>% 
   group_by(year) %>% 
   summarise(mean_minifigs = mean(minifigs_count)) %>%
@@ -452,6 +518,8 @@ lego_sets %>%
     theme_minimal()
 ```
 
+## Zależności
+
 ```{r}
 lego_sets %>% 
   filter(minifigs_count > 0) %>% 
@@ -466,42 +534,6 @@ lego_sets %>%
 
 ```{r}
 lego_sets %>% 
-  filter(minifigs_count > 0) %>% 
-  ggplot(aes(x=minifigs_count)) +
-  geom_density() +
-  theme_minimal()
-```
-
-```{r}
-lego_sets %>%
-  group_by(name) %>%
-  summarise(has_more_versions = if_else(sum(version) > 1, "Więcej niż jedna wersja", "Jedna wersja")) %>%
-  count(has_more_versions) %>%
-  ggplot(aes(has_more_versions, n, fill=factor(has_more_versions))) +
-    geom_bar(stat="identity") + 
-    ggtitle("Podział zestawów w zależności od liczby wersji") + 
-    xlab("") + 
-    ylab("") +
-    theme_minimal() +
-    guides(fill = "none")  
-```
-
-
-```{r}
-lego_sets %>%
-  mutate(has_minifigs = if_else(minifigs_count > 0, "Zestawy z figurkami", "Zestawy bez figurek")) %>%
-  count(has_minifigs) %>%
-  ggplot(aes(has_minifigs, n, fill=factor(has_minifigs))) +
-    geom_bar(stat="identity") + 
-    ggtitle("Podział zestawów w zależności od posiadnia minifigurek") + 
-    xlab("") + 
-    ylab("liczba zestawów") +
-    theme_minimal() +
-    guides(fill = "none")  
-```
-
-```{r}
-lego_sets %>% 
   mutate(has_minifigs = if_else(minifigs_count > 0, "Zestawy z figurkami", "Zestawy bez figurek")) %>%
   count(year, has_minifigs) %>% 
   ggplot(aes(x=year, y=n, fill=has_minifigs)) +
@@ -512,21 +544,7 @@ lego_sets %>%
     theme_minimal()
 ```
 
-
-```{r}
-theme_mean_minifigs_count <- lego_sets %>% 
-  group_by(theme) %>%
-  summarise(mean_minifigs_count=mean(minifigs_count)) %>%
-  filter(mean_minifigs_count > quantile(mean_minifigs_count, probs=c(.80)))
-
-ggplot(theme_mean_minifigs_count,aes(x=reorder(theme, mean_minifigs_count), y=mean_minifigs_count)) +
-  geom_bar(stat="identity") + 
-  coord_flip() + 
-  ggtitle("Motywy z największą średnią liczby minifigurek") + 
-  xlab("motyw główny") + 
-  ylab("liczba minifigurek") +
-  theme_minimal()
-```
+# Analiza części Lego
 
 ```{r}
 lego_parts %>%
@@ -576,7 +594,6 @@ ggplot(category_parts_count,aes(x=reorder(color, n), y=n)) +
         axis.ticks.x=element_blank())
 
 ```
-
 
 ```{r}
 lego_parts %>%
