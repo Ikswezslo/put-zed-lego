@@ -9,6 +9,8 @@ output:
     number_sections: yes
 ---
 
+# Podsumowanie
+
 # Załadowanie bibliotek i globalna konfiguracja
 
 ```{r, message=FALSE, warning=FALSE}
@@ -42,123 +44,173 @@ sets <- read.csv("data/sets.csv")
 themes <- read.csv("data/themes.csv")
 ```
 
-# Przegląd tabel występujących w bazie Rebrickable
+Aby przyspieszyć tworzenie raportów, blok ten jest cachowany.
 
-## inventories
+# Przegląd tabel pochodzących ze strony Rebrickable
+
+## Tabela inventories
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(inventories))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(inventories)
 ```
 
-## inventory_parts
+## Tabela inventory_parts
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(inventory_parts))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(inventory_parts)
 ```
 
-## parts
+## Tabela parts
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(parts))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(parts)
 ```
 
-## colors
+## Tabela colors
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(colors))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(colors)
 ```
 
-## part_categories
+## Tabela part_categories
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(part_categories))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(part_categories)
 ```
 
-## elements
+## Tabela elements
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(elements))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(elements)
 ```
 
-## part_relationships
+## Tabela part_relationships
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(part_relationships))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(part_relationships)
 ```
 
-## inventory_minifigs
+## Tabela inventory_minifigs
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(inventory_minifigs))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(inventory_minifigs)
 ```
 
-## minifigs
+## Tabela minifigs
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(minifigs))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(minifigs)
 ```
 
-## inventory_sets
+## Tabela inventory_sets
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(inventory_sets))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(inventory_sets)
 ```
 
-## sets
+## Tabela sets
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(sets))
 ```
 
+Podsumowanie tabeli:
+
 ```{r}
 summary(sets)
 ```
 
-## themes
+## Tabela themes
+
+Przykładowe wartości:
 
 ```{r}
 kable(head(themes))
 ```
+
+Podsumowanie tabeli:
 
 ```{r}
 summary(themes)
@@ -166,7 +218,7 @@ summary(themes)
 
 # Utworzenie tabel do analizy
 
-## Uzyskanie informacji o głównym motywie dla każdego zestawu
+## Uzyskanie informacji o głównym motywie dla każdego motywu
 
 ```{r}
 main_themes <- mutate(themes, main_theme=name, root_id=parent_id)
@@ -181,7 +233,9 @@ for (i in row.names(themes)) {
 kable(head(main_themes))
 ```
 
-## Powiązanie pozycji z inwentarza z zestawami i głównym motywem
+Ze względu na bardzo dużą liczbę motywów, które mogą mieć zestawy lego, postanowiłem ograniczyć się jedynie do motywów głównych. Aby tego dokonać, dla każdego istniejącego motywu znalazłem i dodałem odpowiedni motyw główny. W ten sposób liczba motywów ograniczyła się z 385 unikalnych motywów do 145 głównych motywów. Nowo utworzona tabela nosi nazwę 'main_themes' i jej przykładowe wartości prezentuje powyższa tabela.
+
+## Powiązanie tabeli nadrzędnej zestawami i głównym motywem
 
 ```{r}
 lego_sets <- merge(inventories, sets, by = "set_num")
@@ -194,7 +248,9 @@ lego_sets <- lego_sets %>%
 kable(head(lego_sets))
 ```
 
-## Dodanie informacji o liczbie figurek
+Następnie tabele 'inventories' i 'sets' są łączone ze sobą wewnętrznie w wyniku czego tracona jest część danych z tabeli 'inventories'. Utracone wiersze prezentują jednak jedynie pojedyncze minifigurki dlatego postanowiłem nie uwzględniać tych danych w analizie. Poźniej nowo utworzona tabela jest łączona z tabelą 'main_themes'. Ponadto ograniczyłem liczbę kolumn do: id, set_num, version, name (dawniej name.x), year, num_parts, theme (dawniej main_theme) oraz zmieniłem typ zmiennej theme na zmienną kategorialną. Ostatecznie powstaje tabela 'lego_sets' i jej przykładowe wartości prezentuje powyższa tabela.
+
+## Dodanie informacji o liczbie minifigurek
 
 ```{r}
 merged_minifigs <- merge(inventory_minifigs, minifigs, by = "fig_num") %>%
@@ -207,11 +263,15 @@ lego_sets$minifigs_count[is.na(lego_sets$minifigs_count)] <- 0
 kable(head(lego_sets))
 ```
 
+W ostatnim kroku dodane zostają informacje o liczbie w każdym zestawie. Nie każdy zestaw posiada minifigurki, dlatego wykorzystałem połączenie zewnętrzne lewostronne. Brakujące wartości zostały zestąpione zerami. W powyższej tabeli znajdują się przykładowe wartości.
+
+Podsumowanie uzyskanej tabeli:
+
 ```{r}
 summary(lego_sets)
 ```
 
-## Powiązanie klocków z ich kolorem i kategorią
+## Powiązanie części Lego z ich kolorem i kategorią
 
 ```{r}
 lego_parts <- merge(inventory_parts, colors, by.x = "color_id", by.y = "id")
@@ -228,6 +288,10 @@ lego_parts <- lego_parts %>%
 
 kable(head(lego_parts))
 ```
+
+Dodatkowo dla analizy skoncetrowanej na częściach Lego, połączyłem tabele inventory_parts, colors i part_categories tworząc tabelę wynikową 'lego_parts', której przykładowe wartości widoczne są w powyższej tabeli. Ograniczyłem liczbę kolumn do: inventory_id, quantity, is_spare, color (dawniej name.x), rgb, is_trans, part_material, category (dawniej name). Zmieniłem typy zmiennych category, part_material i color na zmienne kategorialne. Z kolei zmienne is_trans i is_spare stały się zmiennymi logicznymi.
+
+Podsumowanie uzyskanej tabeli:
 
 ```{r}
 summary(lego_parts)
@@ -659,6 +723,15 @@ prettyTable(data)
  
 ```{r}
 sqrt(mean((data$actual - data$predicted)^2))
+```
+ 
+```{r}
+data %>% 
+  ggplot(aes(x=actual, y=predicted)) +
+    geom_point() + 
+    xlab("Cena rzeczywista") + 
+    ylab("Cena przewidywana") +
+    theme_minimal()
 ```
  
  
