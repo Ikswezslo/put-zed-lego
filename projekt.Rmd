@@ -12,6 +12,8 @@ output:
 
 # Podsumowanie
 
+Głównymi celami projektu było dokonanie analizy bazy danych Lego oraz stworzenie modelu potrafiącego przewidywać cechy przyszłych zestawów (w moim przypadku ceny zestawu). Początkowym krokiem było odpowiednie połączenie ze sobą tabel. W przypadku połączenia zestawów Lego z liczbą minifigurek ważne było wykorzystanie połączenia zewnętrzengo, aby nie stracić zestawów bez minifigurek, a następnie zastąpienie brakujących wartości liczby minifigurek zerami. Analizowane są przede wszystkim zestawy Lego, jednak znajduje się także kilka wykresów dotyczących części Lego. Dla rozkładów wartości zauważyłem m.in. lokalne wzniesienie przy 100 częściach Lego na wykresie gęstości. W przypadku trendów na przestrzeni lat dostrzegłem m.in. spadek liczby produkowanych zestawów na początku lat 2000 oraz brak trendu dla średniej liczby minifigurek w zestawach. Do predykcji wykorzystałem obcy zbiór danych zawierający sugerowane ceny zestawów, które będą przewidywane przy użyciu modelu stworzonego przy pomocy pakietu XGBoost. Aby przygotować dane do wykorzystania przez model, skorzystałem z pakietu vtreat. Przed treningiem modelu dokonałem analizy wartości cen zestawów jak i ich zależności z czasem, liczbą części i liczbą minifigurek. W każdym przypadku widoczna była dodatnia korelacja. Ostatecznie model uzyskał wartość RMSE równą 33.551, a uzyskane przewidywania zostały przedstawione w tabeli i na wykresie.
+
 # Wczytanie bibliotek i globalna konfiguracja
 
 ```{r, message=FALSE, warning=FALSE}
@@ -313,7 +315,7 @@ ggplot(lego_sets, aes(x=num_parts)) +
         axis.ticks.y=element_blank())
 ```
 
-Z wykresu ciężko coś odczytać ze względu na dużą liczbę ekstremalnych wartości oraz skoncentrowanie danych w okolicach zera. Z tego względu postanowiłem pozbyć się wartości najbardziej odstających: 
+Z wykresu ciężko coś odczytać ze względu na dużą liczbę odstających wartości oraz skoncentrowanie danych w okolicach zera. Z tego względu postanowiłem pozbyć się wartości najbardziej odstających: 
 
 ```{r, echo=TRUE}
 quartiles <- quantile(lego_sets$num_parts, probs=c(.25, .75))
@@ -325,12 +327,12 @@ Upper <- quartiles[2] + 1.5*IQR
 lego_sets_num_parts_no_outliers <- subset(lego_sets, lego_sets$num_parts > Lower & lego_sets$num_parts < Upper)
 ```
 
-Kolejne 2 wykresy przedstawiają rozkład liczby części Lego po usunięciu ekstremalnych wartości: 
+Kolejne 2 wykresy przedstawiają rozkład liczby części Lego po usunięciu odstających wartości: 
 
 ```{r}
 p <- ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   geom_density() + 
-  ggtitle("Rozkład liczby części Lego bez ekstremalnych wartości") + 
+  ggtitle("Rozkład liczby części Lego bez odstających wartości") + 
   xlab("liczba części") + 
   ylab("") +
   theme_minimal() + 
@@ -343,7 +345,7 @@ ggplotly()
 ```{r}
 ggplot(lego_sets_num_parts_no_outliers, aes(x=num_parts)) +
   geom_boxplot() +
-  ggtitle("Rozkład liczby części Lego bez ekstremalnych wartości") + 
+  ggtitle("Rozkład liczby części Lego bez odstających wartości") + 
   xlab("liczba części") + 
   ylab("") +
   theme_minimal() + 
@@ -479,7 +481,7 @@ ggplot(theme_mean_minifigs_count,aes(x=reorder(theme, mean_minifigs_count), y=me
   theme_minimal()
 ```
 
-## Trendy
+## Trendy na przestrzeni lat
 
 ```{r, message=FALSE}
 lego_sets %>% 
@@ -546,7 +548,7 @@ lego_sets %>%
   ggplot(aes(x=num_parts, y=minifigs_count)) +
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
-    ggtitle("Zależność między liczbą minifigurek a liczbą części") + 
+    ggtitle("Korelacja między liczbą minifigurek a liczbą części") + 
     xlab("liczba części") + 
     ylab("liczba minifigurek") +
     theme_minimal()
@@ -685,7 +687,7 @@ lego_sets_with_price %>%
   ggplot(aes(x=price, y=num_parts)) +
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
-    ggtitle("Zależność między ceną a liczbą części") + 
+    ggtitle("Korelacja między ceną a liczbą części") + 
     xlab("cena") + 
     ylab("liczba części") +
     theme_minimal()
@@ -696,7 +698,7 @@ lego_sets_with_price %>%
   ggplot(aes(x=price, y=minifigs_count)) +
     geom_point(alpha = 1/10) + 
     geom_smooth(method = lm) + 
-    ggtitle("Zależność między ceną a liczbą minifigurek") + 
+    ggtitle("Korelacja między ceną a liczbą minifigurek") + 
     xlab("cena") + 
     ylab("liczba minifigurek") +
     theme_minimal()
