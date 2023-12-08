@@ -741,9 +741,9 @@ cv <- xgb.cv(trainMatrix, label = trainData$price,
 evalframe <- as.data.frame(cv$evaluation_log)
 ```
  
-Początkowo odbywa się faza dostrajania hiperparametru 'nrounds' oznaczającego liczbę iteracji w trakcie treningu. Poniżej znajduje się wykres z uzyskanymi wynikami i wybraną liczbą iteracji oznaczoną niebieską linią:
+Początkowo odbywa się faza dostrajania hiperparametru 'nrounds' oznaczającego liczbę tworzonych drzew. Poniżej znajduje się wykres z uzyskanymi wynikami i wybraną liczbą drzew oznaczoną niebieską linią:
  
-```{r,echo=TRUE}
+```{r}
 NROUNDS <- which.min(evalframe$test_rmse_mean)
 
 ggplot(evalframe, aes(x=iter, y=test_rmse_mean)) +
